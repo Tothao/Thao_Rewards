@@ -8,8 +8,8 @@
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" layout="1column" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <update handle="checkout_cart_item_renderers"/>
     <body>
-        <referenceContainer name="content">
-            <block class="Thao\Rewards\Block\Cart\AppReward" name="checkout.cart.reward"  template="Thao_Rewards::cart/coupon.phtml"/>
+        <referenceContainer name="cart.discount">
+            <block class="Thao\Rewards\Block\Cart\AppReward" name="checkout.cart.reward"  template="Thao_Rewards::cart/reward.phtml" />
         </referenceContainer>
     </body>
 </page>

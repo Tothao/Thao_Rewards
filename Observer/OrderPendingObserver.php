@@ -25,12 +25,14 @@ class  OrderPendingObserver implements ObserverInterface
     public function execute(EventObserver $observer)
     {
         $order = $observer->getEvent()->getDataObject();
-        $state = $order ->getState();
+        $state = $order->getState();
         if($state=='pending'){
             $this->getRewardPoint($order);
         }
     }
 
-    public function getRewardPoint($order)
+    public function getRewardPoint(){
+
+    }
 
 }

@@ -63,13 +63,13 @@ class  OrderCompleteObserver implements ObserverInterface
      */
     public function getRewardPoint($order)
     {
-        $reWardAmount = ($order->getGrandTotal())/10;
+        $reWardAmount = ($order->getGrandTotal());
         $reWards = $this->rewardFactory->create();
         $reWards
             ->setAmount($reWardAmount)
             ->setComment("so diem duoc cong".$reWardAmount)
             ->setAction(Reward::ORDER_COMPLETED_ACTION)
-            ->setPointLeft($this->getOderPointLeft($order)+$reWardAmount)
+            ->setPointLeft($this->getOderPointLeft($order) + $reWardAmount)
             ->setCustomerId($order->getCustomerId())
             ->save();
     }

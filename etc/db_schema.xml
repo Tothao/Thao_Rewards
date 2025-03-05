@@ -12,7 +12,10 @@
 		<column name="point_left" nullable="false" xsi:type="int" comment="Point Left"/>
         <column name="customer_id" nullable="false" xsi:type="int" comment="Customer Id" />
 	</table>
-        <table name="sales_order" resource="default" engine="innodb" comment="sales_order">
-            <column name="discount_coupon_amount" nullable="false" xsi:type="int" comment="discount_coupon_amount" default="0"/>
-        </table>
+    <table name="sales_order" resource="default" engine="innodb" comment="sales_order">
+        <column name="reward_point_used" nullable="false" xsi:type="int" comment="reward_point_used" default="0"/>
+    </table>
+    <table name="quote" resource="default" engine="innodb" comment="quote">
+        <column name="reward_point_used" nullable="false" xsi:type="int" comment="reward_point_use" default="0"/>
+    </table>
 </schema>
