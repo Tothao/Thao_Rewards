@@ -6,7 +6,7 @@ use Magento\Sales\Model\OrderFactory;
 use Magento\Sales\Model\Order;
 use Thao\Rewards\Model\RewardFactory;
 use Thao\Rewards\Model\Reward;
-use Thao\Rewards\Model\ResourceModel\Reward\CollectionFactory;
+use Thao\Rewards\Helper\Data;
 
 
 class  OrderCompleteObserver implements ObserverInterface
@@ -23,24 +23,24 @@ class  OrderCompleteObserver implements ObserverInterface
     protected $rewardFactory;
 
     /**
-     * @var CollectionFactory
+     * @var Data
      */
-    protected $rewardCollectionFactory;
+    protected $helper;
 
     /**
      * @param Order $order
      * @param RewardFactory $rewardFactory
-     * @param CollectionFactory $rewardCollectionFactory
+     * @param Data $helper
      */
     public function __construct(
         Order $order,
         RewardFactory $rewardFactory,
-        CollectionFactory $rewardCollectionFactory
+        Data $helper
     )
     {
         $this->order=$order;
         $this->rewardFactory= $rewardFactory;
-        $this->rewardCollectionFactory =$rewardCollectionFactory;
+        $this->helper = $helper;
     }
 
     /**
@@ -52,6 +52,7 @@ class  OrderCompleteObserver implements ObserverInterface
     {
         $order = $observer->getEvent()->getDataObject();
         $state = $order ->getState();
+//        $rewardPointUsed = $order->getRewardPointUsed();
         if($state=='complete'){
             $this->getRewardPoint($order);
         }
@@ -69,7 +70,7 @@ class  OrderCompleteObserver implements ObserverInterface
             ->setAmount($reWardAmount)
             ->setComment("so diem duoc cong".$reWardAmount)
             ->setAction(Reward::ORDER_COMPLETED_ACTION)
-            ->setPointLeft($this->getOderPointLeft($order) + $reWardAmount)
+            ->setPointLeft($this->helper->getOrderPointLeft($order,null) + $reWardAmount)
             ->setCustomerId($order->getCustomerId())
             ->save();
     }
@@ -77,12 +78,13 @@ class  OrderCompleteObserver implements ObserverInterface
     /**
      * @return void
      */
-    public function  getOderPointLeft($order){
+//    public function  getOrderPointLeft($order){
+//
+//        $rewardsCollection = $this->rewardCollectionFactory->create()
+//            ->addFieldToFilter('customer_id',$order->getCustomerId());
+//        $totalAmount = $rewardsCollection->getColumnValues('amount');
+//        return array_sum($totalAmount);
+//    }
 
-        $rewardsCollection = $this->rewardCollectionFactory->create()
-            ->addFieldToFilter('customer_id',$order->getCustomerId());
-        $totalAmount = $rewardsCollection->getColumnValues('amount');
-        return array_sum($totalAmount);
-    }
 
 }

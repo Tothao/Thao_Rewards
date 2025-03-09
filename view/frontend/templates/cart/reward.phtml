@@ -1,72 +1,80 @@
 <?php
-/**
- * Copyright © Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
- */
 
-// phpcs:disable Generic.Files.LineLength.TooLong
+/** @var \Thao\Rewards\Block\Cart\ApplyReward $block */
+$pointUsed = $block->getRewardPointUsed();
 
-/**
- * @var \Magento\Framework\View\Element\AbstractBlock $block
- */
+$isUsedRewardPoint = $pointUsed ? true : false;
 
-// We should use strlen function because coupon code could be "0", converted to bool will lead to false
-$hasCouponCode = $block->getReward() !== null && strlen($block->getReward()) > 0;
 ?>
 <div class="block discount"
      id="block-discount"
-     data-mage-init='{"collapsible":{"active": <?= $hasCouponCode ? 'true' : 'false' ?>, "openedState": "active", "saveState": false}}'>
+     data-mage-init='{"collapsible":{"active": true, "openedState": "active", "saveState": false}}'>
     <div class="title" data-role="title">
-        <strong id="block-discount-heading" role="heading" aria-level="2"><?= $block->escapeHtml(__('Apply Reward Point')) ?></strong>
+        <strong id="block-discount-heading" role="heading" aria-level="2"><?= $block->escapeHtml(__('Apply Reward Points')) ?></strong>
     </div>
     <div class="content" data-role="content" aria-labelledby="block-discount-heading">
-        <form id="sales_rule_coupon_request"
-              action="<?= $block->escapeUrl($block->getUrl('reward/cart/RewardPost')) ?>"
-              method="post"
-              data-mage-init='{"discountCode":{"couponCodeSelector": "#coupon_code",
-                                               "removeCouponSelector": "#remove-coupon",
-                                               "applyButton": "button.action.apply",
-                                               "cancelButton": "button.action.cancel"}}'>
-            <div class="fieldset coupon<?= $hasCouponCode ? ' applied' : '' ?>">
-                <input type="hidden" name="remove" id="remove-coupon" value="0" />
+        <form id="sales_rule_reward_point_used"
+              action="<?= $block->escapeUrl($block->getUrl('rewards/cart/RewardPost')) ?>"
+              method="post">
+            <input type="hidden" name="form_key" value="<?= $block->escapeHtmlAttr($block->getFormKey()) ?>" />
+
+            <input type="hidden" name="remove" value="<?= $isUsedRewardPoint ? 1 : 0 ?>" />
+
+            <div class="fieldset coupon">
                 <div class="field">
-                    <label for="coupon_code" class="label">
-                        <span><?= $block->escapeHtml(__('Enter discount code')) ?></span>
+                    <label for="reward_point" class="label">
+                        <span><?= $block->escapeHtml(__('Enter Reward Points')) ?></span>
                     </label>
                     <div class="control">
-                        <input type="text"
+                        <input type="number"
                                class="input-text"
-                               id="coupon_code"
-                               name="coupon_code"
-                               value="<?= $block->escapeHtmlAttr($block->getReward()) ?>"
-                               placeholder="<?= $block->escapeHtmlAttr(__('Enter discount code')) ?>"
-                                <?php if ($hasCouponCode): ?>
-                                   disabled="disabled"
-                                <?php endif; ?>
+                               id="reward_point"
+                               name="reward_point"
+                               value="<?= $pointUsed ? $pointUsed : '' ?>"
+                               <?= $isUsedRewardPoint? 'disabled' : ''?>
+                               placeholder="<?= $block->escapeHtmlAttr(__('Enter reward points')) ?>"
                         />
                     </div>
                 </div>
                 <div class="actions-toolbar">
-                    <?php if (!$hasCouponCode): ?>
+                    <?php if (!$isUsedRewardPoint): ?>
                     <div class="primary">
-                        <button class="action apply primary" type="button"
-                                value="<?= $block->escapeHtmlAttr(__('Apply Discount')) ?>">
-                            <span><?= $block->escapeHtml(__('Apply Discount')) ?></span>
+                        <button class="action apply primary" type="submit">
+                            <span><?= $block->escapeHtml(__('Apply Reward Points')) ?></span>
                         </button>
                     </div>
                     <?php else: ?>
-                        <div class="primary">
-                            <button  type="button" class="action cancel primary"
-                                     value="<?= $block->escapeHtmlAttr(__('Cancel Coupon')) ?>">
-                                <span><?= $block->escapeHtml(__('Cancel Coupon')) ?></span>
-                            </button>
-                        </div>
+                    <div class="primary" >
+                        <button type="submit" class="action cancel primary">
+                            <span><?= $block->escapeHtml(__('Cancel Reward Points')) ?></span>
+                        </button>
+                    </div>
                     <?php endif; ?>
                 </div>
             </div>
-            <?php if (!$hasCouponCode): ?>
-                <?= /* @noEscape */ $block->getChildHtml('captcha') ?>
-            <?php endif; ?>
         </form>
     </div>
 </div>
+
+<!--<script>-->
+<!--    require(['jquery'], function($) {-->
+<!--        $(document).ready(function() {-->
+<!--            $('.action.apply').click(function() {-->
+<!--                let rewardPoints = $('#reward_point').val().trim();-->
+<!--                if (!rewardPoints || isNaN(rewardPoints) || parseInt(rewardPoints) <= 0) {-->
+<!--                    alert('Vui lòng nhập điểm thưởng hợp lệ.');-->
+<!--                    return false;-->
+<!--                }-->
+<!---->
+<!--                $('#remove-coupon').val(0);-->
+<!--                $('#sales_rule_reward_point_used').submit();-->
+<!--            });-->
+<!---->
+<!--            $('.action.cancel').click(function() {-->
+<!--                $('#remove-coupon').val(1);-->
+<!--                $('#reward_point').val('').prop('disabled', false);-->
+<!--                $('#sales_rule_reward_point_used').submit();-->
+<!--            });-->
+<!--        });-->
+<!--    });-->
+<!--</script>-->

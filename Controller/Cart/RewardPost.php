@@ -1,141 +1,75 @@
 <?php
-/**
- * Copyright © Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
- */
-namespace Thao\Rewards\Cart\RewardPost;
+namespace Thao\Rewards\Controller\Cart;
 
 use Magento\Framework\App\Action\HttpPostActionInterface as HttpPostActionInterface;
+use Magento\Framework\App\Action\Context;
+use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Checkout\Model\Session as CheckoutSession;
+use Magento\Store\Model\StoreManagerInterface;
+use Magento\Framework\Data\Form\FormKey\Validator;
+use Magento\Checkout\Model\Cart;
+use Magento\Quote\Api\CartRepositoryInterface;
+use Magento\SalesRule\Model\CouponFactory;
+use Thao\Rewards\Helper\Data;
 
-/**
- * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
- */
-class RewardPost extends \Magento\Checkout\Controller\Cart implements HttpPostActionInterface
+class RewardPost extends \Magento\Checkout\Controller\Cart
 {
-    /**
-     * Sales quote repository
-     *
-     * @var \Magento\Quote\Api\CartRepositoryInterface
-     */
     protected $quoteRepository;
-
-    /**
-     * @var \Magento\SalesRule\Model\CouponFactory
-     */
     protected $couponFactory;
 
-    /**
-     * @param \Magento\Framework\App\Action\Context $context
-     * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
-     * @param \Magento\Checkout\Model\Session $checkoutSession
-     * @param \Magento\Store\Model\StoreManagerInterface $storeManager
-     * @param \Magento\Framework\Data\Form\FormKey\Validator $formKeyValidator
-     * @param \Magento\Checkout\Model\Cart $cart
-     * @param \Magento\SalesRule\Model\CouponFactory $couponFactory
-     * @param \Magento\Quote\Api\CartRepositoryInterface $quoteRepository
-     * @codeCoverageIgnore
-     */
+    protected $checkoutSession;
+    protected $helper;
+
     public function __construct(
-        \Magento\Framework\App\Action\Context $context,
-        \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
-        \Magento\Checkout\Model\Session $checkoutSession,
-        \Magento\Store\Model\StoreManagerInterface $storeManager,
-        \Magento\Framework\Data\Form\FormKey\Validator $formKeyValidator,
-        \Magento\Checkout\Model\Cart $cart,
-        \Magento\SalesRule\Model\CouponFactory $couponFactory,
-        \Magento\Quote\Api\CartRepositoryInterface $quoteRepository
+        Context $context,
+        ScopeConfigInterface $scopeConfig,
+        CheckoutSession $checkoutSession,
+        StoreManagerInterface $storeManager,
+        Validator $formKeyValidator,
+        Cart $cart,
+        CouponFactory $couponFactory,
+        CartRepositoryInterface $quoteRepository,
+        Data $helper
     ) {
-        parent::__construct(
-            $context,
-            $scopeConfig,
-            $checkoutSession,
-            $storeManager,
-            $formKeyValidator,
-            $cart
-        );
+        parent::__construct($context, $scopeConfig, $checkoutSession, $storeManager, $formKeyValidator, $cart);
         $this->couponFactory = $couponFactory;
         $this->quoteRepository = $quoteRepository;
+        $this->checkoutSession = $checkoutSession;
+        $this->helper = $helper;
     }
 
-    /**
-     * Initialize coupon
-     *
-     * @return \Magento\Framework\Controller\Result\Redirect
-     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
-     * @SuppressWarnings(PHPMD.NPathComplexity)
-     */
     public function execute()
     {
-        $couponCode = $this->getRequest()->getParam('remove') == 1
-            ? ''
-            : trim($this->getRequest()->getParam('coupon_code', ''));
+        $quote = $this->checkoutSession->getQuote();
+        $remove = (int) $this->getRequest()->getParam('remove');
 
-        $cartQuote = $this->cart->getQuote();
-        $oldCouponCode = $cartQuote->getCouponCode() ?? '';
-
-        $codeLength = strlen($couponCode);
-        if (!$codeLength && !strlen($oldCouponCode)) {
-            return $this->_goBack();
-        }
-
-        try {
-            $isCodeLengthValid = $codeLength && $codeLength <= \Magento\Checkout\Helper\Cart::COUPON_CODE_MAX_LENGTH;
-
-            $itemsCount = $cartQuote->getItemsCount();
-            if ($itemsCount) {
-                $cartQuote->getShippingAddress()->setCollectShippingRates(true);
-                $cartQuote->setCouponCode($isCodeLengthValid ? $couponCode : '')->collectTotals();
-                $this->quoteRepository->save($cartQuote);
+        if ($remove === 1) {
+            $quote->setRewardPointUsed(0);
+            $this->messageManager->addSuccessMessage(__('Reward points removed.'));
+        } else {
+            $rewardPoints = (int) $this->getRequest()->getParam('reward_point');
+            $pointLeft = $this->helper->getOrderPointLeft(null, $quote);
+            if($rewardPoints>$pointLeft){
+                $this->messageManager->addErrorMessage(__('You only have %1 reward points left.', $pointLeft));
+                return $this->_redirect('checkout/cart');
             }
+//
+//            $total = $quote->getGrandTotal();
+//            if($rewardPoints > $total*100){
+//                $rewardPoints = $total*100;
+//            }
 
-            if ($codeLength) {
-                $escaper = $this->_objectManager->get(\Magento\Framework\Escaper::class);
-                $coupon = $this->couponFactory->create();
-                $coupon->load($couponCode, 'code');
-                if (!$itemsCount) {
-                    if ($isCodeLengthValid && $coupon->getId()) {
-                        $this->_checkoutSession->getQuote()->setCouponCode($couponCode)->save();
-                        $this->messageManager->addSuccessMessage(
-                            __(
-                                'You used coupon code "%1".',
-                                $escaper->escapeHtml($couponCode)
-                            )
-                        );
-                    } else {
-                        $this->messageManager->addErrorMessage(
-                            __(
-                                'The coupon code "%1" is not valid.',
-                                $escaper->escapeHtml($couponCode)
-                            )
-                        );
-                    }
-                } else {
-                    if ($isCodeLengthValid && $coupon->getId() && $couponCode == $cartQuote->getCouponCode()) {
-                        $this->messageManager->addSuccessMessage(
-                            __(
-                                'You used coupon code "%1".',
-                                $escaper->escapeHtml($couponCode)
-                            )
-                        );
-                    } else {
-                        $this->messageManager->addErrorMessage(
-                            __(
-                                'The coupon code "%1" is not valid.',
-                                $escaper->escapeHtml($couponCode)
-                            )
-                        );
-                    }
-                }
+            if ($rewardPoints > 0) {
+                $quote->setRewardPointUsed($rewardPoints);
+                $this->messageManager->addSuccessMessage(__('Reward points applied: %1', $rewardPoints));
             } else {
-                $this->messageManager->addSuccessMessage(__('You canceled the coupon code.'));
+                $this->messageManager->addErrorMessage(__('Please enter a valid reward point amount.'));
             }
-        } catch (\Magento\Framework\Exception\LocalizedException $e) {
-            $this->messageManager->addErrorMessage($e->getMessage());
-        } catch (\Exception $e) {
-            $this->messageManager->addErrorMessage(__('We cannot apply the coupon code.'));
-            $this->_objectManager->get(\Psr\Log\LoggerInterface::class)->critical($e);
         }
 
-        return $this->_goBack();
+        $quote->save();
+        return $this->_redirect('checkout/cart');
     }
+
+
 }

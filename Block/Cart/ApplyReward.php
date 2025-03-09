@@ -13,7 +13,7 @@ use Magento\Captcha\Block\Captcha;
  * @api
  * @since 100.0.2
  */
-class AppReward extends \Magento\Checkout\Block\Cart\AbstractCart
+class ApplyReward extends \Magento\Checkout\Block\Cart\AbstractCart
 {
     /**
      * @param \Magento\Framework\View\Element\Template\Context $context
@@ -38,10 +38,6 @@ class AppReward extends \Magento\Checkout\Block\Cart\AbstractCart
      * @return string
      * @codeCoverageIgnore
      */
-    public function getReward()
-    {
-        return $this->getQuote()->getRewardPointUsed();
-    }
 
     /**
      * @inheritDoc
@@ -64,5 +60,13 @@ class AppReward extends \Magento\Checkout\Block\Cart\AbstractCart
         }
 
         return parent::_prepareLayout();
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getRewardPointUsed()
+    {
+        return $this->getQuote()->getRewardPointUsed();
     }
 }
