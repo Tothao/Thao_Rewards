@@ -1,0 +1,34 @@
+
+<?php
+/** @var Thao\Rewards\Block\Cart\MyReward $block */
+$rewardPoint = $block->getLastPointLeft()
+?>
+<h2>MY REWARD POINT:<?= $rewardPoint;?> </h2>
+
+<h4>My Reward Points History</h4>
+<?php $rewards = $block->getRewardHistory(); ?>
+
+<?php if (!empty($rewards)) : ?>
+    <table border="1" cellspacing="0" cellpadding="5">
+        <thead>
+        <tr>
+            <th>Action Date</th>
+            <th>Amount</th>
+            <th>Comment</th>
+            <th>Point Left</th>
+        </tr>
+        </thead>
+        <tbody>
+        <?php foreach ($rewards as $reward) : ?>
+            <tr>
+                <td><?php echo $reward->getActionDate(); ?></td>
+                <td><?php echo $reward->getAmount(); ?></td>
+                <td><?php echo $reward->getComment(); ?></td>
+                <td><?php echo $reward->getPointLeft(); ?></td>
+            </tr>
+        <?php endforeach; ?>
+        </tbody>
+    </table>
+<?php else : ?>
+    <p>No reward history available.</p>
+<?php endif; ?>

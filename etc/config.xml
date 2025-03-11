@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:App/etc/config.xsd">
+    <default>
+        <rewards_point>
+            <general>
+                <enable>1</enable>
+                <conversion_rate>100</conversion_rate>
+            </general>
+        </rewards_point>
+    </default>
+</config>

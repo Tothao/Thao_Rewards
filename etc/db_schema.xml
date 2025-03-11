@@ -1,0 +1,21 @@
+<?xml version="1.0" ?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+	<table name="thao_rewards_rewards" resource="default" engine="innodb" comment="thao_rewards_rewards Table">
+		<column xsi:type="int" name="reward_id" padding="10" unsigned="true" nullable="false" identity="true" comment="Entity Id"/>
+		<constraint xsi:type="primary" referenceId="PRIMARY">
+			<column name="reward_id"/>
+		</constraint>
+		<column name="action_date" nullable="true" xsi:type="timestamp"  default= "CURRENT_TIMESTAMP"  comment="Action Date" />
+		<column name="amount" nullable="false" xsi:type="int" comment="Amount" />
+		<column name="comment" nullable="true" xsi:type="text" comment="Comment" />
+		<column name="action" xsi:type="varchar" comment="Action" length="255"/>
+		<column name="point_left" nullable="false" xsi:type="int" comment="Point Left"/>
+        <column name="customer_id" nullable="false" xsi:type="int" comment="Customer Id" />
+	</table>
+    <table name="sales_order" resource="default" engine="innodb" comment="sales_order">
+        <column name="reward_point_used" nullable="false" xsi:type="int" comment="reward_point_used" default="0"/>
+    </table>
+    <table name="quote" resource="default" engine="innodb" comment="quote">
+        <column name="reward_point_used" nullable="false" xsi:type="int" comment="reward_point_use" default="0"/>
+    </table>
+</schema>

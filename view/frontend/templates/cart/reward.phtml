@@ -1,0 +1,80 @@
+<?php
+
+/** @var \Thao\Rewards\Block\Cart\ApplyReward $block */
+$pointUsed = $block->getRewardPointUsed();
+
+$isUsedRewardPoint = $pointUsed ? true : false;
+
+?>
+<div class="block discount"
+     id="block-discount"
+     data-mage-init='{"collapsible":{"active": true, "openedState": "active", "saveState": false}}'>
+    <div class="title" data-role="title">
+        <strong id="block-discount-heading" role="heading" aria-level="2"><?= $block->escapeHtml(__('Apply Reward Points')) ?></strong>
+    </div>
+    <div class="content" data-role="content" aria-labelledby="block-discount-heading">
+        <form id="sales_rule_reward_point_used"
+              action="<?= $block->escapeUrl($block->getUrl('rewards/cart/RewardPost')) ?>"
+              method="post">
+            <input type="hidden" name="form_key" value="<?= $block->escapeHtmlAttr($block->getFormKey()) ?>" />
+
+            <input type="hidden" name="remove" value="<?= $isUsedRewardPoint ? 1 : 0 ?>" />
+
+            <div class="fieldset coupon">
+                <div class="field">
+                    <label for="reward_point" class="label">
+                        <span><?= $block->escapeHtml(__('Enter Reward Points')) ?></span>
+                    </label>
+                    <div class="control">
+                        <input type="number"
+                               class="input-text"
+                               id="reward_point"
+                               name="reward_point"
+                               value="<?= $pointUsed ? $pointUsed : '' ?>"
+                               <?= $isUsedRewardPoint? 'disabled' : ''?>
+                               placeholder="<?= $block->escapeHtmlAttr(__('Enter reward points')) ?>"
+                        />
+                    </div>
+                </div>
+                <div class="actions-toolbar">
+                    <?php if (!$isUsedRewardPoint): ?>
+                    <div class="primary">
+                        <button class="action apply primary" type="submit">
+                            <span><?= $block->escapeHtml(__('Apply Reward Points')) ?></span>
+                        </button>
+                    </div>
+                    <?php else: ?>
+                    <div class="primary" >
+                        <button type="submit" class="action cancel primary">
+                            <span><?= $block->escapeHtml(__('Cancel Reward Points')) ?></span>
+                        </button>
+                    </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!--<script>-->
+<!--    require(['jquery'], function($) {-->
+<!--        $(document).ready(function() {-->
+<!--            $('.action.apply').click(function() {-->
+<!--                let rewardPoints = $('#reward_point').val().trim();-->
+<!--                if (!rewardPoints || isNaN(rewardPoints) || parseInt(rewardPoints) <= 0) {-->
+<!--                    alert('Vui lòng nhập điểm thưởng hợp lệ.');-->
+<!--                    return false;-->
+<!--                }-->
+<!---->
+<!--                $('#remove-coupon').val(0);-->
+<!--                $('#sales_rule_reward_point_used').submit();-->
+<!--            });-->
+<!---->
+<!--            $('.action.cancel').click(function() {-->
+<!--                $('#remove-coupon').val(1);-->
+<!--                $('#reward_point').val('').prop('disabled', false);-->
+<!--                $('#sales_rule_reward_point_used').submit();-->
+<!--            });-->
+<!--        });-->
+<!--    });-->
+<!--</script>-->
