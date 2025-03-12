@@ -51,12 +51,11 @@ class  SaveRewardPointsObserver implements ObserverInterface
             $reWards = $this->rewardFactory->create();
             $reWards
                 ->setAmount(-$rewardPointsUsed)
-                ->setComment("so diem duoc tru".$rewardPointsUsed)
+                ->setComment("Used point: ".$rewardPointsUsed)
                 ->setAction(Reward::REWARDS_SPEND_ACTION)
                 ->setPointLeft($this->helper->getOrderPointLeft($order, null) - $rewardPointsUsed)
                 ->setCustomerId($order->getCustomerId())
                 ->save();
-
         }
 
     }

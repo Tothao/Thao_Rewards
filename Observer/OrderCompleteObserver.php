@@ -12,12 +12,6 @@ use Thao\Rewards\Helper\Data;
 class  OrderCompleteObserver implements ObserverInterface
 {
     /**
-     * @var Order
-     */
-    protected $order;
-
-
-    /**
      * @var RewardFactory
      */
     protected $rewardFactory;
@@ -28,17 +22,13 @@ class  OrderCompleteObserver implements ObserverInterface
     protected $helper;
 
     /**
-     * @param Order $order
      * @param RewardFactory $rewardFactory
      * @param Data $helper
      */
     public function __construct(
-        Order $order,
         RewardFactory $rewardFactory,
         Data $helper
-    )
-    {
-        $this->order=$order;
+    ) {
         $this->rewardFactory= $rewardFactory;
         $this->helper = $helper;
     }
@@ -57,7 +47,13 @@ class  OrderCompleteObserver implements ObserverInterface
         $order = $observer->getEvent()->getDataObject();
         $state = $order ->getState();
         if($state=='complete'){
-            $this->getRewardPoint($order);
+            $this->setRewardPoint($order);
+        }
+
+        $isRewardPointUsed = $order->getRewardPointUsed();
+
+        if ($state ==  'canceled' && $isRewardPointUsed){
+            $this->setRefundReward($order);
         }
     }
 
@@ -65,29 +61,29 @@ class  OrderCompleteObserver implements ObserverInterface
      * @param $subtotal
      * @return void
      */
-    public function getRewardPoint($order)
+    public function setRewardPoint($order)
     {
         $reWardAmount = ($order->getGrandTotal());
         $reWards = $this->rewardFactory->create();
         $reWards
             ->setAmount($reWardAmount)
-            ->setComment("so diem duoc cong".$reWardAmount)
+            ->setComment("Order complete #" . $order->getIncrementId())
             ->setAction(Reward::ORDER_COMPLETED_ACTION)
             ->setPointLeft($this->helper->getOrderPointLeft($order,null) + $reWardAmount)
             ->setCustomerId($order->getCustomerId())
             ->save();
     }
-
-    /**
-     * @return void
-     */
-//    public function  getOrderPointLeft($order){
-//
-//        $rewardsCollection = $this->rewardCollectionFactory->create()
-//            ->addFieldToFilter('customer_id',$order->getCustomerId());
-//        $totalAmount = $rewardsCollection->getColumnValues('amount');
-//        return array_sum($totalAmount);
-//    }
-
-
+    public function setRefundReward($order)
+    {
+        $isRewardPointUsed = $order->getRewardPointUsed();
+        $reWardAmount = ($isRewardPointUsed);
+        $reWards = $this->rewardFactory->create();
+        $reWards
+            ->setAmount($reWardAmount)
+            ->setComment("cancel order #" . $order->getIncrementId())
+            ->setAction(Reward::ORDER_CANCEL_ACTION)
+            ->setPointLeft($this->helper->getOrderPointLeft($order,null) + $reWardAmount)
+            ->setCustomerId($order->getCustomerId())
+            ->save();
+    }
 }

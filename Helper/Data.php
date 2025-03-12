@@ -53,10 +53,12 @@ Class Data extends AbstractHelper
     public function enabledRewardPoint() {
         $ValueConfig = $this->scopeConfig->getValue('rewards_point/general/enable',
             \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+        return $ValueConfig;
     }
 
     public function getRatePoint() {
      $ratePoint = $this->scopeConfig->getValue('rewards_point/general/conversion_rate',
          \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+     return $ratePoint;
     }
 }

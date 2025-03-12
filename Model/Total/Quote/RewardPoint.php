@@ -84,6 +84,7 @@ class RewardPoint extends \Magento\Quote\Model\Quote\Address\Total\AbstractTotal
      */
     public function fetch(\Magento\Quote\Model\Quote  $quote, \Magento\Quote\Model\Quote\Address\Total $total)
     {
+        $rate = $this->helper->getRatePoint();
         $rewardPointUsed = $quote->getData('reward_point_used');
         $totalDiscountByRewardPoint = $rewardPointUsed/$rate;
         $value = $totalDiscountByRewardPoint;
